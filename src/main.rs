@@ -35,7 +35,7 @@ struct CliArgs {
     percentage: u8,
 
     #[arg(long, value_enum)]
-    copy: CopyMode,
+    copy: Option<CopyMode>,
 }
 
 fn hex_to_rgb(hex: &str) -> [u8; 3] {
@@ -249,10 +249,11 @@ fn main() {
         let tinted = colour.tint(args.percentage);
 
         match args.copy {
-            CopyMode::RgbShades => clipboard_items.push(shaded.rgb_string()),
-            CopyMode::RgbTints => clipboard_items.push(tinted.rgb_string()),
-            CopyMode::HexShades => clipboard_items.push(shaded.hex_string()),
-            CopyMode::HexTints => clipboard_items.push(tinted.hex_string()),
+            None => {}
+            Some(CopyMode::RgbShades) => clipboard_items.push(shaded.rgb_string()),
+            Some(CopyMode::RgbTints) => clipboard_items.push(tinted.rgb_string()),
+            Some(CopyMode::HexShades) => clipboard_items.push(shaded.hex_string()),
+            Some(CopyMode::HexTints) => clipboard_items.push(tinted.hex_string()),
         }
 
         let group = ColourGroup {
