@@ -243,6 +243,10 @@ fn main() {
 
     let args = CliArgs::parse();
 
+    if args.copy_separator.is_some() && args.copy.is_none() {
+        eprintln!("Warning: Specified --copy-separator but not --copy. This does nothing.");
+    }
+
     let hex_codes = args.color.replace("#", "");
     let hex_codes = hex_codes.split(" ");
 
