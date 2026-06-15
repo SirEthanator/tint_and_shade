@@ -2,6 +2,7 @@ mod cursor;
 
 use clap::{Parser, ValueEnum};
 use cursor::{fmt_move_cursor_by, move_cursor_by};
+use std::env;
 use std::io::{self, Write};
 
 const RESET: &str = "\x1b[0m";
@@ -231,6 +232,15 @@ fn highlight_string(str: &str, bg: &[u8; 3]) -> String {
 }
 
 fn main() {
+    let term_supports_truecolor = match env::var("COLORTERM") {
+        Ok(val) => val == "truecolor" || val == "24bit",
+        Err(_) => false,
+    };
+
+    if !term_supports_truecolor {
+        eprintln!("Warning: Terminal does not support truecolor. Output will not look correct.");
+    }
+
     let args = CliArgs::parse();
 
     let hex_codes = args.color.replace("#", "");
