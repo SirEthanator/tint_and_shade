@@ -121,7 +121,7 @@ impl Color {
     fn parse_rgb(rgb_str: &str) -> Option<[u8; 3]> {
         let rgb_str = rgb_str.trim();
 
-        if !rgb_str.starts_with("rgb(") || !rgb_str.ends_with(")") {
+        if !rgb_str.to_lowercase().starts_with("rgb(") || !rgb_str.ends_with(")") {
             return None;
         }
 
