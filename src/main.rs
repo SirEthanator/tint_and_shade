@@ -10,7 +10,7 @@ use color_group::ColorGroup;
 
 use clap::{Parser, ValueEnum};
 use std::env;
-use std::process::{ExitCode};
+use std::process::ExitCode;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, ValueEnum)]
 enum CopyMode {
@@ -26,6 +26,12 @@ enum CopySeparator {
     Newline,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, ValueEnum)]
+enum OutputFormat {
+    Full,
+    Basic,
+}
+
 #[derive(Parser)]
 struct CliArgs {
     /// List of colors in hex or rgb format. E.g. #FFFFFF, FFFFFF, rgb(255, 255, 255)
@@ -36,13 +42,17 @@ struct CliArgs {
     #[arg(short, long, value_parser=clap::value_parser!(u8).range(0..=100))]
     percentage: u8,
 
-    /// Output format for clipboard copying. Omit to copy nothing.
+    /// Format for clipboard copying. Omit to copy nothing.
     #[arg(long, value_enum)]
     copy: Option<CopyMode>,
 
     /// Delimiter used to separate copied items.
     #[arg(long, value_enum)]
     copy_separator: Option<CopySeparator>,
+
+    /// Output format
+    #[arg(short, long, value_enum, default_value_t = OutputFormat::Full)]
+    output_format: OutputFormat,
 }
 
 fn main() -> ExitCode {
@@ -51,11 +61,12 @@ fn main() -> ExitCode {
         Err(_) => false,
     };
 
-    if !term_supports_truecolor {
-        log::warn("Terminal does not support truecolor. Output will not look correct.");
-    }
+    let mut args = CliArgs::parse();
 
-    let args = CliArgs::parse();
+    if !term_supports_truecolor && args.output_format != OutputFormat::Basic {
+        log::warn("Terminal does not support truecolor. Falling back to basic output.");
+        args.output_format = OutputFormat::Basic;
+    }
 
     if args.copy_separator.is_some() && args.copy.is_none() {
         log::warn("Specified --copy-separator but not --copy. This does nothing.");
@@ -63,12 +74,11 @@ fn main() -> ExitCode {
 
     let mut clipboard_items: Vec<String> = Vec::new();
 
-    println!();
-
-    let Some(term_width) = get_term_width() else {
-        log::error("Failed to get terminal size");
-        return ExitCode::FAILURE;
-    };
+    let term_width = get_term_width().unwrap_or_else(|| {
+        log::warn("Failed to get terminal size: Falling back to basic ouput mode");
+        args.output_format = OutputFormat::Basic;
+        0
+    });
 
     let mut iter = args.colors.iter().peekable();
     while let Some(color_string) = iter.next() {
@@ -100,7 +110,7 @@ fn main() -> ExitCode {
             tinted,
         };
 
-        group.print_colors(term_width);
+        group.print_colors(args.output_format, term_width);
 
         if iter.peek().is_some() {
             println!();

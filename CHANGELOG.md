@@ -14,3 +14,4 @@
 - Improved error and warning styling
 - rgb colors are now accepted in CLI arguments in rgb(r, g, b) format
 - Added descriptions to CLI arguments
+- Added basic output mode
