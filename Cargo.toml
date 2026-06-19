@@ -1,5 +1,6 @@
 [package]
 name = "tint-and-shade"
+description = "A minimal CLI for generating tints and shades from any color."
 version = "1.0.0"
 edition = "2021"
 

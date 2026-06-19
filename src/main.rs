@@ -12,6 +12,10 @@ use clap::{Parser, ValueEnum};
 use std::env;
 use std::process::ExitCode;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
+const PKG_NAME: &str = env!("CARGO_PKG_NAME");
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq, ValueEnum)]
 enum CopyMode {
     RgbShades,
@@ -33,6 +37,9 @@ enum OutputFormat {
 }
 
 #[derive(Parser)]
+#[command(name = PKG_NAME)]
+#[command(version = VERSION)]
+#[command(about = DESCRIPTION)]
 struct CliArgs {
     /// List of colors in hex or rgb format. E.g. #FFFFFF, FFFFFF, rgb(255, 255, 255)
     #[arg(required = true)]
